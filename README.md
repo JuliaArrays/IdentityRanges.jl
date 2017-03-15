@@ -1,7 +1,7 @@
 # IdentityRanges
 
-[![Build Status](https://travis-ci.org/timholy/IdentityRanges.jl.svg?branch=master)](https://travis-ci.org/timholy/IdentityRanges.jl)
+[![Build Status](https://travis-ci.org/JuliaArrays/IdentityRanges.jl.svg?branch=master)](https://travis-ci.org/JuliaArrays/IdentityRanges.jl)
 
-[![Coverage Status](https://coveralls.io/repos/timholy/IdentityRanges.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/timholy/IdentityRanges.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/JuliaArrays/IdentityRanges.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaArrays/IdentityRanges.jl?branch=master)
 
-[![codecov.io](http://codecov.io/github/timholy/IdentityRanges.jl/coverage.svg?branch=master)](http://codecov.io/github/timholy/IdentityRanges.jl?branch=master)
+[![codecov.io](http://codecov.io/github/JuliaArrays/IdentityRanges.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaArrays/IdentityRanges.jl?branch=master)
