@@ -91,6 +91,7 @@ function Base.:+(r::IdentityRange, x::Number)
     indsr = indices(r, 1)
     OffsetArray(indsr+x, indsr)
 end
+Base.:+(x::Real, r::IdentityRange) = r+x
 Base.:+(x::Number, r::IdentityRange) = r+x
 function Base.:-(r::IdentityRange)
     indsr = indices(r, 1)
