@@ -85,7 +85,7 @@ end
 function Base.:-(r::IdentityRange, s::IdentityRange)
     indsr = indices(r, 1)
     indsr == indices(s, 1) || throw(DimensionMismatch("indices $indsr and $(indices(s, 1)) do not match"))
-    OffsetArray(convert(UnitRange, r)-convert(UnitRange, s), indsr)
+    OffsetArray(fill(first(r)-first(s), length(r)), indsr)
 end
 function Base.:+(r::IdentityRange, x::Number)
     indsr = indices(r, 1)
@@ -114,7 +114,7 @@ function Base.:/(r::IdentityRange, x::Number)
     OffsetArray(indsr/x, indsr)
 end
 
-Base.collect(r::IdentityRange) = OffsetArray(first(r):last(r), first(r):last(r))
+Base.collect(r::IdentityRange) = convert(Vector, first(r):last(r))
 Base.sortperm(r::IdentityRange) = r
 function Base.reverse(r::IdentityRange)
     indsr = indices(r, 1)
@@ -130,13 +130,5 @@ Base.convert{T<:Integer}(::Type{IdentityRange}, r::AbstractUnitRange{T}) =
     convert(IdentityRange{T}, r)
 
 Base.show(io::IO, r::IdentityRange) = print(io, "IdentityRange(", first(r), ":", last(r), ")")
-
-# @compat const IdentityView{T,N,P,I<:Tuple{Vararg{IdentityRange}},L} = SubArray{T,N,P,I,L}
-
-# Base.convert{T,n,S}(::Type{Array{T}}, x::IdentityView{S, n}) = convert(Array{T, n}, x)
-# function Base.convert{T,n,S}(::Type{Array{T,n}}, x::IdentityView{S,n})
-#     dest = Array{T,n}(size(x))
-#     copy!(dest, CartesianRange(indices(dest)), x, CartesianRange(indices(x)))
-# end
 
 end
