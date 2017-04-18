@@ -1,5 +1,9 @@
 using IdentityRanges, Base.Test, OffsetArrays
 
+if VERSION >= v"0.6.0-pre.beta"
+    @test isempty(detect_ambiguities(IdentityRanges, Base, Core))
+end
+
 # TODO: once we can rely on Julia 0.6, the try/catch won't be necessary
 try
     @testset "IdentityRanges" begin
@@ -27,12 +31,16 @@ try
             @test r[r] === r
             @test r+1 != 1:3
             @test r+1 === OffsetArray(1:3, indices(r))
+            @test r+1 === 1+r
+            @test r-1 === OffsetArray(-1:1, indices(r))
+            @test 1-r === OffsetArray(1:-1:-1, indices(r))
             @test 2*r === OffsetArray(0:2:4, indices(r))
             k = -1
             for i in r
                 @test i == (k+=1)
             end
             @test k == length(r)-1
+            @test collect(r) == [0,1,2]
             @test intersect(r, IdentityRange(-1,1)) === intersect(IdentityRange(-1,1), r) === IdentityRange(0,1)
             @test intersect(r, -1:5) === intersect(-1:5, r) === 0:2
             @test intersect(r, 2:5) === intersect(2:5, r) === 2:2
@@ -58,11 +66,12 @@ try
             @test minimum(r) == 2
             @test sortperm(r) == r
             @test r != 2:4
-            @test IdentityRange(1:4) == 1:4
+            @test 1:4 == IdentityRange(1:4) == 1:4
             @test r+r == OffsetArray(4:2:8, indices(r))
+            @test r-r == OffsetArray([0,0,0], indices(r))
             @test (9:2:13)-r == 7:9
             @test -r == OffsetArray(-2:-1:-4, indices(r))
-            @test collect(reverse(r)) == OffsetArray(4:-1:2, indices(r))
+            @test reverse(r) == OffsetArray(4:-1:2, indices(r))
             @test r/2 == OffsetArray(1:0.5:2, indices(r))
 
             r = IdentityRange{Int16}(0, 4)
@@ -92,18 +101,12 @@ try
             v = view(a, idr)
             @test indices(v) == (2:4,)
             @test_broken v == OffsetArray(a[2:4], 2:4)  # Julia bug (linear indexing only)
-            # Not entirely clear whether we want the following behavior:
-            @test_broken convert(Vector, v) == a[2:4]
-            @test_broken convert(Array{Float32}, v) == Float32.(a[2:4])
-            @test_broken convert(Vector{Float32}, v) == Float32.(a[2:4])
 
             a = rand(5, 5)
             idr2 = IdentityRange(3:4)
             v = view(a, idr, idr2)
             @test indices(v) == (2:4, 3:4)
             @test v == OffsetArray(a[2:4, 3:4], 2:4, 3:4)
-            # Not entirely clear whether we want the following behavior:
-            @test_broken convert(Matrix, v) == a[2:4, 3:4]
         end
     end
 catch err
