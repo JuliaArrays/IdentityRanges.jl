@@ -62,7 +62,7 @@ try
             @test r+r == OffsetArray(4:2:8, indices(r))
             @test (9:2:13)-r == 7:9
             @test -r == OffsetArray(-2:-1:-4, indices(r))
-            @test collect(reverse(r)) == OffsetArray(4:-1:2, indices(r))
+            @test reverse(r) == OffsetArray(4:-1:2, indices(r))
             @test r/2 == OffsetArray(1:0.5:2, indices(r))
 
             r = IdentityRange{Int16}(0, 4)
