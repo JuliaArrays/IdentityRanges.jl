@@ -1,8 +1,6 @@
 using IdentityRanges, Base.Test, OffsetArrays
 
-if VERSION >= v"0.6.0-pre.beta"
-    @test isempty(detect_ambiguities(IdentityRanges, Base, Core))
-end
+@test isempty(detect_ambiguities(IdentityRanges, Base, Core))
 
 # TODO: once we can rely on Julia 0.6, the try/catch won't be necessary
 try

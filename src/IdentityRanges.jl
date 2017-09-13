@@ -33,39 +33,39 @@ julia> indices(v2, 1)
 3:5
 ```
 """
-immutable IdentityRange{T<:Integer} <: AbstractUnitRange{T}
+struct IdentityRange{T<:Integer} <: AbstractUnitRange{T}
     start::T
     stop::T
-    (::Type{IdentityRange{T}}){T}(start, stop) = new{T}(start, stop)
+    IdentityRange{T}(start, stop) where {T} = new{T}(start, stop)
 end
-IdentityRange{T<:Integer}(start::T, stop::T) = IdentityRange{T}(start, stop)
+IdentityRange(start::T, stop::T) where {T<:Integer} = IdentityRange{T}(start, stop)
 
 Base.indices(r::IdentityRange) = (r.start:r.stop,)
 Base.unsafe_indices(r::IdentityRange) = (r.start:r.stop,)
 
-_length{T}(r::IdentityRange{T}) = max(zero(T), convert(T, r.stop-r.start+1))
+_length(r::IdentityRange{T}) where {T} = max(zero(T), convert(T, r.stop-r.start+1))
 Base.length(r::IdentityRange) = _length(r)
-Base.length{T<:Union{Int,Int64}}(r::IdentityRange{T}) = _length(r)
+Base.length(r::IdentityRange{T}) where {T<:Union{Int,Int64}} = _length(r)
 
 let smallint = (Int === Int64 ?
                 Union{Int8,UInt8,Int16,UInt16,Int32,UInt32} :
                 Union{Int8,UInt8,Int16,UInt16})
-    Base.length{T <: smallint}(r::IdentityRange{T}) = Int(_length(r))
-    Base.start{T<:smallint}(r::IdentityRange{T}) = Int(r.start)
+    Base.length(r::IdentityRange{T}) where {T <: smallint} = Int(_length(r))
+    Base.start(r::IdentityRange{T}) where {T<:smallint} = Int(r.start)
 end
 
-Base.first{T}(r::IdentityRange{T}) = r.start
-Base.last{ T}(r::IdentityRange{T}) = r.stop
+Base.first(r::IdentityRange{T}) where {T} = r.start
+Base.last(r::IdentityRange{T}) where { T} = r.stop
 
-Base.start{T}(r::IdentityRange{T}) = oftype(one(T)+one(T), first(r))
-Base.done{T}(r::IdentityRange{T}, i) = i == oftype(i, last(r)) + 1
+Base.start(r::IdentityRange{T}) where {T} = oftype(one(T)+one(T), first(r))
+Base.done(r::IdentityRange{T}, i) where {T} = i == oftype(i, last(r)) + 1
 
-@inline function Base.getindex{T}(v::IdentityRange{T}, i::Integer)
+@inline function Base.getindex(v::IdentityRange{T}, i::Integer) where T
     @boundscheck ((i >= first(v)) & (i <= last(v))) || Base.throw_boundserror(v, i)
     convert(T, i)
 end
 
-@inline function Base.getindex{R,S<:Integer}(r::IdentityRange{R}, s::AbstractUnitRange{S})
+@inline function Base.getindex(r::IdentityRange{R}, s::AbstractUnitRange{S}) where {R,S<:Integer}
     @boundscheck checkbounds(r, s)
     IdentityRange{R}(first(s), last(s))
 end
@@ -122,12 +122,12 @@ function Base.reverse(r::IdentityRange)
     OffsetArray(reverse(indsr), indsr)
 end
 
-Base.promote_rule{T1,T2}(::Type{IdentityRange{T1}},::Type{IdentityRange{T2}}) =
+Base.promote_rule(::Type{IdentityRange{T1}},::Type{IdentityRange{T2}}) where {T1,T2} =
     IdentityRange{promote_type(T1,T2)}
-Base.convert{T<:Integer}(::Type{IdentityRange{T}}, r::IdentityRange{T}) = r
-Base.convert{T<:Integer}(::Type{IdentityRange{T}}, r::AbstractUnitRange) =
+Base.convert(::Type{IdentityRange{T}}, r::IdentityRange{T}) where {T<:Integer} = r
+Base.convert(::Type{IdentityRange{T}}, r::AbstractUnitRange) where {T<:Integer} =
     IdentityRange{T}(first(r), last(r))
-Base.convert{T<:Integer}(::Type{IdentityRange}, r::AbstractUnitRange{T}) =
+Base.convert(::Type{IdentityRange}, r::AbstractUnitRange{T}) where {T<:Integer} =
     convert(IdentityRange{T}, r)
 
 Base.show(io::IO, r::IdentityRange) = print(io, "IdentityRange(", first(r), ":", last(r), ")")
