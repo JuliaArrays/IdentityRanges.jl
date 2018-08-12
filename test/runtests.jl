@@ -1,4 +1,4 @@
-using IdentityRanges, Base.Test, OffsetArrays
+using IdentityRanges, Test, OffsetArrays
 
 @test isempty(detect_ambiguities(IdentityRanges, Base, Core))
 
@@ -14,7 +14,7 @@ try
             @test !isempty(r)
             @test length(r) == 3
             @test size(r) == (3,)
-            @test indices(r) === (0:2,)
+            @test axes(r) === (0:2,)
             @test step(r) == 1
             @test first(r) == 0
             @test last(r) == 2
@@ -28,11 +28,11 @@ try
             @test r[0:2] === IdentityRange(0:2)
             @test r[r] === r
             @test r+1 != 1:3
-            @test r+1 === OffsetArray(1:3, indices(r))
+            @test r+1 === OffsetArray(1:3, axes(r))
             @test r+1 === 1+r
-            @test r-1 === OffsetArray(-1:1, indices(r))
-            @test 1-r === OffsetArray(1:-1:-1, indices(r))
-            @test 2*r === OffsetArray(0:2:4, indices(r))
+            @test r-1 === OffsetArray(-1:1, axes(r))
+            @test 1-r === OffsetArray(1:-1:-1, axes(r))
+            @test 2*r === OffsetArray(0:2:4, axes(r))
             k = -1
             for i in r
                 @test i == (k+=1)
@@ -65,16 +65,16 @@ try
             @test sortperm(r) == r
             @test r != 2:4
             @test 1:4 == IdentityRange(1:4) == 1:4
-            @test r+r == OffsetArray(4:2:8, indices(r))
-            @test r-r == OffsetArray([0,0,0], indices(r))
+            @test r+r == OffsetArray(4:2:8, axes(r))
+            @test r-r == OffsetArray([0,0,0], axes(r))
             @test (9:2:13)-r == 7:9
-            @test -r == OffsetArray(-2:-1:-4, indices(r))
-            @test reverse(r) == OffsetArray(4:-1:2, indices(r))
-            @test r/2 == OffsetArray(1:0.5:2, indices(r))
+            @test -r == OffsetArray(-2:-1:-4, axes(r))
+            @test reverse(r) == OffsetArray(4:-1:2, axes(r))
+            @test r/2 == OffsetArray(1:0.5:2, axes(r))
 
             r = IdentityRange{Int16}(0, 4)
             @test length(r) === 5
-            @test start(r) === 0
+            @test iterate(r) == (0,0)
             k = -1
             for i in r
                 @test i == (k+=1)
@@ -93,17 +93,17 @@ try
             @test length(r) === Int128(10)
         end
 
-        @testset "View indices" begin
+        @testset "View axes" begin
             a = rand(8)
             idr = IdentityRange(2:4)
             v = view(a, idr)
-            @test indices(v) == (2:4,)
-            @test_broken v == OffsetArray(a[2:4], 2:4)  # Julia bug (linear indexing only)
+            @test axes(v) == (2:4,)
+            @test v == OffsetArray(a[2:4], 2:4)
 
             a = rand(5, 5)
             idr2 = IdentityRange(3:4)
             v = view(a, idr, idr2)
-            @test indices(v) == (2:4, 3:4)
+            @test axes(v) == (2:4, 3:4)
             @test v == OffsetArray(a[2:4, 3:4], 2:4, 3:4)
         end
     end
