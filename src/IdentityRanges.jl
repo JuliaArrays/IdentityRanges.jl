@@ -1,6 +1,7 @@
 module IdentityRanges
 
 using OffsetArrays
+using Base.Broadcast: DefaultArrayStyle
 
 export IdentityRange
 
@@ -81,7 +82,7 @@ Base.intersect(r::IdentityRange, s::IdentityRange) = IdentityRange(max(first(r),
                                                                    min(last(r), last(s)))
 
 Base.:(==)(r::IdentityRange, s::IdentityRange) = (first(r) == first(s)) & (step(r) == step(s)) & (last(r) == last(s))
-Base.:(==)(r::IdentityRange, s::OrdinalRange) = (first(r) == first(s) == 1) & (step(r) == step(s)) & (last(r) == last(s))
+Base.:(==)(r::IdentityRange, s::OrdinalRange) = (first(r) == first(s) == first(axes(s)[1])) & (step(r) == step(s)) & (last(r) == last(s))
 Base.:(==)(s::OrdinalRange, r::IdentityRange) = r == s
 
 function Base.:+(r::IdentityRange, s::IdentityRange)
@@ -94,23 +95,32 @@ function Base.:-(r::IdentityRange, s::IdentityRange)
     indsr == axes(s, 1) || throw(DimensionMismatch("axes $indsr and $(axes(s, 1)) do not match"))
     OffsetArray(fill(first(r)-first(s), length(r)), indsr)
 end
-function Base.:+(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
-    OffsetArray(indsr.+x, indsr)
-end
-Base.:+(x::Real, r::IdentityRange) = r+x
-Base.:+(x::Number, r::IdentityRange) = r+x
+
+# Unary operation
+
 function Base.:-(r::IdentityRange)
     indsr = axes(r, 1)
     OffsetArray(-indsr, indsr)
 end
-function Base.:-(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
-    OffsetArray(indsr.-x, indsr)
-end
-function Base.:-(x::Number, r::IdentityRange)
-    indsr = axes(r, 1)
-    OffsetArray(x.-indsr, indsr)
+
+# Binary operations
+
+for T in (Real, Number)
+    @eval begin
+        function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+), r::IdentityRange, x::$T)
+            indsr = axes(r, 1)
+            OffsetArray(indsr.+x, indsr)
+        end
+        Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+),  x::$T, r::IdentityRange) = r .+ x
+        function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), r::IdentityRange, x::$T)
+            indsr = axes(r, 1)
+            OffsetArray(indsr.-x, indsr)
+        end
+        function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), x::$T, r::IdentityRange)
+            indsr = axes(r, 1)
+            OffsetArray(x.-indsr, indsr)
+        end
+    end
 end
 function Base.:*(r::IdentityRange, x::Number)
     indsr = axes(r, 1)
@@ -121,6 +131,14 @@ function Base.:/(r::IdentityRange, x::Number)
     indsr = axes(r, 1)
     OffsetArray(indsr./x, indsr)
 end
+function Base.:\(x::Number, r::IdentityRange)
+    indsr = axes(r, 1)
+    OffsetArray(x .\ indsr, indsr)
+end
+Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(*), r::IdentityRange, x::Number) = r * x
+Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(*), x::Number, r::IdentityRange) = r * x
+Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(/), r::IdentityRange, x::Number) = r / x
+Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(\), x::Number, r::IdentityRange) = x \ r
 
 Base.collect(r::IdentityRange) = convert(Vector, first(r):last(r))
 Base.sortperm(r::IdentityRange) = r
@@ -141,5 +159,16 @@ Base.show(io::IO, r::IdentityRange) = print(io, "IdentityRange(", first(r), ":",
 
 IdentityRange{R}(r::AbstractUnitRange{T}) where {R,T} = convert(IdentityRange{R}, r)
 IdentityRange(r::AbstractUnitRange{T}) where {T} = convert(IdentityRange, r)
+
+# Deprecations
+import Base: +, -
+@deprecate +(r::IdentityRange, x::Real) broadcast(+, r, x)
+@deprecate +(x::Real, r::IdentityRange) broadcast(+, x, r)
+@deprecate +(r::IdentityRange, x::Number) broadcast(+, r, x)
+@deprecate +(x::Number, r::IdentityRange) broadcast(+, x, r)
+@deprecate -(r::IdentityRange, x::Real) broadcast(-, r, x)
+@deprecate -(x::Real, r::IdentityRange) broadcast(-, x, r)
+@deprecate -(r::IdentityRange, x::Number) broadcast(-, r, x)
+@deprecate -(x::Number, r::IdentityRange) broadcast(-, x, r)
 
 end

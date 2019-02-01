@@ -27,12 +27,12 @@ try
             @test_throws BoundsError r[-1]
             @test r[0:2] === IdentityRange(0:2)
             @test r[r] === r
-            @test r+1 != 1:3
-            @test r+1 === OffsetArray(1:3, axes(r))
-            @test r+1 === 1+r
-            @test r-1 === OffsetArray(-1:1, axes(r))
-            @test 1-r === OffsetArray(1:-1:-1, axes(r))
-            @test 2*r === OffsetArray(0:2:4, axes(r))
+            @test r .+ 1 != 1:3
+            @test r .+ 1 === OffsetArray(1:3, axes(r))
+            @test r .+ 1 === 1 .+ r
+            @test r .- 1 === OffsetArray(-1:1, axes(r))
+            @test 1 .- r === OffsetArray(1:-1:-1, axes(r))
+            @test 2 * r === 2 .* r === r * 2 === r .* 2 === OffsetArray(0:2:4, axes(r))
             k = -1
             for i in r
                 @test i == (k+=1)
@@ -70,7 +70,8 @@ try
             @test (9:2:13)-r == 7:9
             @test -r == OffsetArray(-2:-1:-4, axes(r))
             @test reverse(r) == OffsetArray(4:-1:2, axes(r))
-            @test r/2 == OffsetArray(1:0.5:2, axes(r))
+            @test r / 2 == r ./ 2 == OffsetArray(1:0.5:2, axes(r))
+            @test 2 \ r == 2 .\ r == OffsetArray(1:0.5:2, axes(r))
 
             r = IdentityRange{Int16}(0, 4)
             @test length(r) === 5
