@@ -82,7 +82,7 @@ Base.intersect(r::IdentityRange, s::IdentityRange) = IdentityRange(max(first(r),
                                                                    min(last(r), last(s)))
 
 Base.:(==)(r::IdentityRange, s::IdentityRange) = (first(r) == first(s)) & (step(r) == step(s)) & (last(r) == last(s))
-Base.:(==)(r::IdentityRange, s::OrdinalRange) = (first(r) == first(s) == 1) & (step(r) == step(s)) & (last(r) == last(s))
+Base.:(==)(r::IdentityRange, s::OrdinalRange) = (first(r) == first(s) == first(axes(s)[1])) & (step(r) == step(s)) & (last(r) == last(s))
 Base.:(==)(s::OrdinalRange, r::IdentityRange) = r == s
 
 function Base.:+(r::IdentityRange, s::IdentityRange)
