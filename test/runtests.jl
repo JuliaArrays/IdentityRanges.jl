@@ -107,6 +107,14 @@ try
             @test axes(v) == (2:4, 3:4)
             @test v == OffsetArray(a[2:4, 3:4], 2:4, 3:4)
         end
+
+        @testset "findfirst, findlast, findall" begin
+            idr = IdentityRange(-2:2)
+            isneg = x -> x < 0
+            @test findfirst(isneg, idr) == -2
+            @test findlast(isneg, idr) == -1
+            @test findall(isneg, idr) == -2:-1
+        end
     end
 catch err
     if err.fail == 0 && err.error == 0
