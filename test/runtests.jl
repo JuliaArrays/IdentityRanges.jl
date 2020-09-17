@@ -14,7 +14,7 @@ try
             @test !isempty(r)
             @test length(r) == 3
             @test size(r) == (3,)
-            @test axes(r) === (0:2,)
+            @test axes(r) === (r,)
             @test step(r) == 1
             @test first(r) == 0
             @test last(r) == 2
@@ -98,13 +98,13 @@ try
             a = rand(8)
             idr = IdentityRange(2:4)
             v = view(a, idr)
-            @test axes(v) == (2:4,)
+            @test axes(v) == (idr,)
             @test v == OffsetArray(a[2:4], 2:4)
 
             a = rand(5, 5)
             idr2 = IdentityRange(3:4)
             v = view(a, idr, idr2)
-            @test axes(v) == (2:4, 3:4)
+            @test axes(v) == (idr, idr2)
             @test v == OffsetArray(a[2:4, 3:4], 2:4, 3:4)
         end
 

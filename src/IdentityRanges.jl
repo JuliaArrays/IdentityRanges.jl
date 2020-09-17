@@ -29,7 +29,7 @@ IdentityRange(3:5)
 julia> v2 = view(a, idr);
 
 julia> axes(v2, 1)
-3:5
+IdentityRange(3:5)
 ```
 """
 struct IdentityRange{T<:Integer} <: AbstractUnitRange{T}
@@ -39,8 +39,8 @@ struct IdentityRange{T<:Integer} <: AbstractUnitRange{T}
 end
 IdentityRange(start::T, stop::T) where {T<:Integer} = IdentityRange{T}(start, stop)
 
-Base.axes(r::IdentityRange) = (r.start:r.stop,)
-Base.unsafe_indices(r::IdentityRange) = (r.start:r.stop,)
+Base.axes(r::IdentityRange) = (r,)
+Base.unsafe_indices(r::IdentityRange) = (r,)
 
 _length(r::IdentityRange{T}) where {T} = max(zero(T), convert(T, r.stop-r.start+1))
 Base.length(r::IdentityRange) = _length(r)
