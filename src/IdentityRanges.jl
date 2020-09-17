@@ -99,7 +99,7 @@ end
 # Unary operation
 
 function Base.:-(r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(-indsr, indsr)
 end
 
@@ -108,31 +108,31 @@ end
 for T in (Real, Number)
     @eval begin
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+), r::IdentityRange, x::$T)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(indsr.+x, indsr)
         end
         Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+),  x::$T, r::IdentityRange) = r .+ x
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), r::IdentityRange, x::$T)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(indsr.-x, indsr)
         end
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), x::$T, r::IdentityRange)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(x.-indsr, indsr)
         end
     end
 end
 function Base.:*(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(indsr.*x, indsr)
 end
 Base.:*(x::Number, r::IdentityRange) = r*x
 function Base.:/(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(indsr./x, indsr)
 end
 function Base.:\(x::Number, r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(x .\ indsr, indsr)
 end
 Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(*), r::IdentityRange, x::Number) = r * x
@@ -143,7 +143,7 @@ Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(\), x::Number, r::Identit
 Base.collect(r::IdentityRange) = convert(Vector, first(r):last(r))
 Base.sortperm(r::IdentityRange) = r
 function Base.reverse(r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(reverse(indsr), indsr)
 end
 
