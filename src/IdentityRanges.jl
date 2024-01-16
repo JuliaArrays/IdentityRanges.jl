@@ -29,7 +29,7 @@ IdentityRange(3:5)
 julia> v2 = view(a, idr);
 
 julia> axes(v2, 1)
-3:5
+IdentityRange(3:5)
 ```
 """
 struct IdentityRange{T<:Integer} <: AbstractUnitRange{T}
@@ -39,8 +39,8 @@ struct IdentityRange{T<:Integer} <: AbstractUnitRange{T}
 end
 IdentityRange(start::T, stop::T) where {T<:Integer} = IdentityRange{T}(start, stop)
 
-Base.axes(r::IdentityRange) = (r.start:r.stop,)
-Base.unsafe_indices(r::IdentityRange) = (r.start:r.stop,)
+Base.axes(r::IdentityRange) = (r,)
+Base.unsafe_indices(r::IdentityRange) = (r,)
 
 _length(r::IdentityRange{T}) where {T} = max(zero(T), convert(T, r.stop-r.start+1))
 Base.length(r::IdentityRange) = _length(r)
@@ -99,7 +99,7 @@ end
 # Unary operation
 
 function Base.:-(r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(-indsr, indsr)
 end
 
@@ -108,31 +108,31 @@ end
 for T in (Real, Number)
     @eval begin
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+), r::IdentityRange, x::$T)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(indsr.+x, indsr)
         end
         Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(+),  x::$T, r::IdentityRange) = r .+ x
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), r::IdentityRange, x::$T)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(indsr.-x, indsr)
         end
         function Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(-), x::$T, r::IdentityRange)
-            indsr = axes(r, 1)
+            indsr = r.start:r.stop
             OffsetArray(x.-indsr, indsr)
         end
     end
 end
 function Base.:*(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(indsr.*x, indsr)
 end
 Base.:*(x::Number, r::IdentityRange) = r*x
 function Base.:/(r::IdentityRange, x::Number)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(indsr./x, indsr)
 end
 function Base.:\(x::Number, r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(x .\ indsr, indsr)
 end
 Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(*), r::IdentityRange, x::Number) = r * x
@@ -143,7 +143,7 @@ Broadcast.broadcasted(::DefaultArrayStyle{1}, ::typeof(\), x::Number, r::Identit
 Base.collect(r::IdentityRange) = convert(Vector, first(r):last(r))
 Base.sortperm(r::IdentityRange) = r
 function Base.reverse(r::IdentityRange)
-    indsr = axes(r, 1)
+    indsr = r.start:r.stop
     OffsetArray(reverse(indsr), indsr)
 end
 
